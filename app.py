@@ -83,7 +83,7 @@ def prepare_features(df):
     df_proc['max_power'] = df_proc.max_power.str.split(' ').str[0]
 
     for col in ['mileage', 'engine', 'max_power']:
-        df_proc.loc[df_proc.col == '', col] = np.nan
+        df_proc.loc[df_proc[col] == '', col] = np.nan
 
     # Применяем функции к колонке датафрейма
     df_proc['torque_value'] = df_proc['torque'].apply(extract_torque_value)
