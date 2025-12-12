@@ -184,7 +184,7 @@ if uploaded_file:
         size = max(3, n_features * 0.3)  # динамический размер
         
         fig3, ax3 = plt.subplots(figsize=(size, size*0.8))
-        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3,
+        heatmap = sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3,
                     annot_kws={"size": 4}, center=0, cbar_kws={"shrink": 0.8})  # уменьшаем шрифт и бар
         
         cbar = heatmap.collections[0].colorbar
