@@ -15,8 +15,8 @@ import re
 
 ##### 0. конфиг страницы
 st.set_page_config(
-    page_title="Churn Prediction",
-    page_icon="🎯",
+    page_title="Car Prices Prediction",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -127,26 +127,27 @@ def prepare_features(df):
     return df_proc
 
 
-##### 3. селккторы
 
-# Выпадающий список
-state = st.selectbox("Штат", ["NY", "CA", "TX"])
+# ##### 3. селккторы
 
-# Слайдер для числовых значений
-account_length = st.slider("Длина аккаунта (месяцы)", 0, 100, 50)
+# # Выпадающий список
+# state = st.selectbox("Штат", ["NY", "CA", "TX"])
 
-# Чекбокс
-international_plan = st.checkbox("Международный план")
+# # Слайдер для числовых значений
+# account_length = st.slider("Длина аккаунта (месяцы)", 0, 100, 50)
+
+# # Чекбокс
+# international_plan = st.checkbox("Международный план")
 
 
 
-###### 4. Визуализация результатов
-# Метрика (показывает ключевой показатель)
-st.metric("Вероятность оттока", "45%", delta="-5%")
+# ###### 4. Визуализация результатов
+# # Метрика (показывает ключевой показатель)
+# st.metric("Вероятность оттока", "45%", delta="-5%")
 
-# Прогресс-бар для визуализации вероятности
-probability = 0.45
-st.progress(probability, text=f"{probability*100:.0f}%")
+# # Прогресс-бар для визуализации вероятности
+# probability = 0.45
+# st.progress(probability, text=f"{probability*100:.0f}%")
 
 # Графики с Plotly (для красивых интерактивных визуализаций)
 
@@ -182,7 +183,40 @@ if uploaded_file:
     # st.metric("Вероятность оттока", f"{probabilities[0]*100:.1f}%")
     # st.progress_bar(probabilities[0])
 
-    fig = px.pie(df, names='name')
-    st.plotly_chart(fig)
+    st.title("📊 EDA")
+    # 1. Гистограмма с селектором признака
+    st.subheader("Гистограмма распределения")
+    selected_feature = st.selectbox(
+        "Выберите признак для гистограммы:",
+        df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    )
+
+    fig1, ax1 = plt.subplots()
+    sns.histplot(data=df, x=selected_feature, ax=ax1, kde=True)
+    st.pyplot(fig1)
+
+    # 2. Корреляция с селектором пары признаков
+    st.subheader("Корреляция между признаками")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        feature_x = st.selectbox("Первый признак (X):", df.columns.tolist())
+    with col2:
+        feature_y = st.selectbox("Второй признак (Y):", df.columns.tolist())
+
+    fig2, ax2 = plt.subplots()
+    sns.scatterplot(data=df, x=feature_x, y=feature_y, ax=ax2)
+    st.pyplot(fig2)
+
+    # 3. Дополнительно: матрица корреляций
+    if st.checkbox("Показать матрицу корреляций"):
+        st.subheader("Матрица корреляций")
+        corr_matrix = df.select_dtypes(include=['int64', 'float64']).corr()
+        fig3, ax3 = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3)
+        st.pyplot(fig3)
+
+    # fig = px.pie(df, names='name')
+    # st.plotly_chart(fig)
 
 
