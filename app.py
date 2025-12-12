@@ -12,6 +12,9 @@ import random
 import seaborn as sns
 import re
 
+# Уменьшаем отступы
+plt.rcParams['figure.autolayout'] = True
+
 
 ##### 0. конфиг страницы
 st.set_page_config(
@@ -184,18 +187,19 @@ if uploaded_file:
     # st.progress_bar(probabilities[0])
 
     st.title("📊 EDA")
-    # 1. Гистограмма с селектором признака
+
+    # 1. Гистограмма - МЕНЬШЕ
     st.subheader("Гистограмма распределения")
     selected_feature = st.selectbox(
         "Выберите признак для гистограммы:",
         features.select_dtypes(include=['int64', 'float64']).columns.tolist()
     )
 
-    fig1, ax1 = plt.subplots(figsize=(6,3))
+    fig1, ax1 = plt.subplots(figsize=(4, 2), dpi=100)  # УМЕНЬШЕНО
     sns.histplot(data=features, x=selected_feature, ax=ax1, kde=True)
-    st.pyplot(fig1)
+    st.pyplot(fig1, use_container_width=False)  # ← КЛЮЧЕВОЕ
 
-    # 2. Корреляция с селектором пары признаков
+    # 2. Корреляция - МЕНЬШЕ
     st.subheader("Корреляция между признаками")
 
     col1, col2 = st.columns(2)
@@ -204,19 +208,27 @@ if uploaded_file:
     with col2:
         feature_y = st.selectbox("Второй признак (Y):", features.columns.tolist())
 
-    fig2, ax2 = plt.subplots(figsize=(6,3))
+    fig2, ax2 = plt.subplots(figsize=(4, 2), dpi=100)  # УМЕНЬШЕНО
     sns.scatterplot(data=features, x=feature_x, y=feature_y, ax=ax2)
-    st.pyplot(fig2)
+    st.pyplot(fig2, use_container_width=False)  # ← КЛЮЧЕВОЕ
 
-    # 3. Дополнительно: матрица корреляций
+    # 3. Матрица корреляций - МЕНЬШЕ
     if st.checkbox("Показать матрицу корреляций"):
         st.subheader("Матрица корреляций")
         corr_matrix = features.select_dtypes(include=['int64', 'float64']).corr()
-        fig3, ax3 = plt.subplots(figsize=(6,3))
-        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3)
-        st.pyplot(fig3)
+        
+        # Подгоняем размер под данные
+        n_features = len(corr_matrix.columns)
+        size = max(3, n_features * 0.3)  # динамический размер
+        
+        fig3, ax3 = plt.subplots(figsize=(size, size*0.8))
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3,
+                    annot_kws={"size": 8}, cbar_kws={"shrink": 0.8})  # уменьшаем шрифт и бар
+        plt.xticks(rotation=45)
+        plt.yticks(rotation=0)
+        st.pyplot(fig3, use_container_width=False)
 
-    # fig = px.pie(df, names='name')
-    # st.plotly_chart(fig)
-    st.title("📊 EDA - 2")
+        # fig = px.pie(df, names='name')
+        # st.plotly_chart(fig)
+        st.title("📊 EDA - 2")
 
