@@ -129,34 +129,6 @@ def prepare_features(df):
     df_proc.drop('name', axis=1, inplace=True)
     return df_proc
 
-
-
-# ##### 3. селккторы
-
-# # Выпадающий список
-# state = st.selectbox("Штат", ["NY", "CA", "TX"])
-
-# # Слайдер для числовых значений
-# account_length = st.slider("Длина аккаунта (месяцы)", 0, 100, 50)
-
-# # Чекбокс
-# international_plan = st.checkbox("Международный план")
-
-
-
-# ###### 4. Визуализация результатов
-# # Метрика (показывает ключевой показатель)
-# st.metric("Вероятность оттока", "45%", delta="-5%")
-
-# # Прогресс-бар для визуализации вероятности
-# probability = 0.45
-# st.progress(probability, text=f"{probability*100:.0f}%")
-
-# Графики с Plotly (для красивых интерактивных визуализаций)
-
-
-
-
 ##### 5. Основная логика прилы
 
 # В интерфейсе:
@@ -176,17 +148,7 @@ if uploaded_file:
     # Подготовка данных
     features = prepare_features(df)
 
-    preds = pipeline.predict(features)
-
-    # Предсказание
-    # probabilities = model.predict_proba(features)[:, 1]
-    # predictions = (probabilities >= 0.5).astype(int)
-    
-    # # Визуализация результатов
-    # st.metric("Вероятность оттока", f"{probabilities[0]*100:.1f}%")
-    # st.progress_bar(probabilities[0])
-
-    st.title("📊 EDA")
+    st.header("📊 EDA")
 
     # 1. Гистограмма - МЕНЬШЕ
     st.subheader("Гистограмма распределения")
@@ -223,12 +185,44 @@ if uploaded_file:
         
         fig3, ax3 = plt.subplots(figsize=(size, size*0.8))
         sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3,
-                    annot_kws={"size": 8}, cbar_kws={"shrink": 0.8})  # уменьшаем шрифт и бар
+                    annot_kws={"size": 4}, cbar_kws={"shrink": 0.8})  # уменьшаем шрифт и бар
         plt.xticks(rotation=45)
         plt.yticks(rotation=0)
         st.pyplot(fig3, use_container_width=False)
 
-        # fig = px.pie(df, names='name')
-        # st.plotly_chart(fig)
-        st.title("📊 EDA - 2")
+
+    # 2. Блок прогнозирования
+    st.header("🎯 Прогнозирование моделью")
+
+    # Запрос индекса
+    index_input = st.number_input(
+        "Введите индекс объекта (0 - {max_idx}):".format(max_idx=len(features)-1),
+        min_value=0,
+        max_value=len(features)-1,
+        value=0
+    )
+
+    if st.button("Сделать прогноз"):
+        # Получаем объект по индексу
+        object_data = features.iloc[[index_input]]  # DataFrame с одной строкой
+        
+        # Прогноз
+        prediction = pipeline.predict(object_data)[0]
+        
+        # Вывод
+        st.subheader("📋 Информация об объекте")
+        st.dataframe(object_data.T.rename(columns={index_input: 'Значение'}))
+        
+        st.subheader("🎯 Результат прогноза")
+        col_pred, col_real = st.columns(2)
+        
+        with col_pred:
+            st.metric(
+                label="Предсказанная цена",
+                value=f"${prediction:,.2f}",
+                delta=None
+            )
+    
+
+
 
