@@ -188,11 +188,11 @@ if uploaded_file:
     st.subheader("Гистограмма распределения")
     selected_feature = st.selectbox(
         "Выберите признак для гистограммы:",
-        df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+        features.select_dtypes(include=['int64', 'float64']).columns.tolist()
     )
 
-    fig1, ax1 = plt.subplots()
-    sns.histplot(data=df, x=selected_feature, ax=ax1, kde=True)
+    fig1, ax1 = plt.subplots(figsize=(6,3))
+    sns.histplot(data=features, x=selected_feature, ax=ax1, kde=True)
     st.pyplot(fig1)
 
     # 2. Корреляция с селектором пары признаков
@@ -200,19 +200,19 @@ if uploaded_file:
 
     col1, col2 = st.columns(2)
     with col1:
-        feature_x = st.selectbox("Первый признак (X):", df.columns.tolist())
+        feature_x = st.selectbox("Первый признак (X):", features.columns.tolist())
     with col2:
-        feature_y = st.selectbox("Второй признак (Y):", df.columns.tolist())
+        feature_y = st.selectbox("Второй признак (Y):", features.columns.tolist())
 
-    fig2, ax2 = plt.subplots()
-    sns.scatterplot(data=df, x=feature_x, y=feature_y, ax=ax2)
+    fig2, ax2 = plt.subplots(figsize=(6,3))
+    sns.scatterplot(data=features, x=feature_x, y=feature_y, ax=ax2)
     st.pyplot(fig2)
 
     # 3. Дополнительно: матрица корреляций
     if st.checkbox("Показать матрицу корреляций"):
         st.subheader("Матрица корреляций")
-        corr_matrix = df.select_dtypes(include=['int64', 'float64']).corr()
-        fig3, ax3 = plt.subplots(figsize=(10, 8))
+        corr_matrix = features.select_dtypes(include=['int64', 'float64']).corr()
+        fig3, ax3 = plt.subplots(figsize=(6,3))
         sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3)
         st.pyplot(fig3)
 
