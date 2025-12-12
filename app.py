@@ -146,7 +146,7 @@ st.metric("Вероятность оттока", "45%", delta="-5%")
 
 # Прогресс-бар для визуализации вероятности
 probability = 0.45
-st.progress_bar(probability, text=f"{probability*100:.0f}%")
+st.progress(probability, text=f"{probability*100:.0f}%")
 
 # Графики с Plotly (для красивых интерактивных визуализаций)
 
