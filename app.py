@@ -186,7 +186,8 @@ if uploaded_file:
         fig3, ax3 = plt.subplots(figsize=(size, size*0.8))
         sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax3,
                     annot_kws={"size": 4}, cbar_kws={"shrink": 0.8})  # уменьшаем шрифт и бар
-        plt.xticks(rotation=45)
+        ax3.tick_params(axis='both', labelsize=6)  
+        plt.xticks(rotation=90)
         plt.yticks(rotation=0)
         st.pyplot(fig3, use_container_width=False)
 
