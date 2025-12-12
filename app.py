@@ -218,5 +218,5 @@ if uploaded_file:
 
     # fig = px.pie(df, names='name')
     # st.plotly_chart(fig)
-
+    st.title("📊 EDA - 2")
 
