@@ -150,18 +150,18 @@ if uploaded_file:
 
     st.header("📊 EDA")
 
-    # 1. Гистограмма - МЕНЬШЕ
+    # 1. Гистограмма
     st.subheader("Гистограмма распределения")
     selected_feature = st.selectbox(
         "Выберите признак для гистограммы:",
         features.select_dtypes(include=['int64', 'float64']).columns.tolist()
     )
 
-    fig1, ax1 = plt.subplots(figsize=(4, 2), dpi=100)  # УМЕНЬШЕНО
+    fig1, ax1 = plt.subplots(figsize=(4, 2), dpi=100)
     sns.histplot(data=features, x=selected_feature, ax=ax1, kde=True)
-    st.pyplot(fig1, use_container_width=False)  # ← КЛЮЧЕВОЕ
+    st.pyplot(fig1, use_container_width=False) 
 
-    # 2. Корреляция - МЕНЬШЕ
+    # 2. Корреляция
     st.subheader("Корреляция между признаками")
 
     col1, col2 = st.columns(2)
@@ -170,11 +170,11 @@ if uploaded_file:
     with col2:
         feature_y = st.selectbox("Второй признак (Y):", features.columns.tolist())
 
-    fig2, ax2 = plt.subplots(figsize=(4, 2), dpi=100)  # УМЕНЬШЕНО
+    fig2, ax2 = plt.subplots(figsize=(4, 2), dpi=100) 
     sns.scatterplot(data=features, x=feature_x, y=feature_y, ax=ax2)
-    st.pyplot(fig2, use_container_width=False)  # ← КЛЮЧЕВОЕ
+    st.pyplot(fig2, use_container_width=False) 
 
-    # 3. Матрица корреляций - МЕНЬШЕ
+    # 3. Матрица корреляций
     if st.checkbox("Показать матрицу корреляций"):
         st.subheader("Матрица корреляций")
         corr_matrix = features.select_dtypes(include=['int64', 'float64']).corr()
@@ -219,9 +219,66 @@ if uploaded_file:
         with col_pred:
             st.metric(
                 label="Предсказанная цена",
-                value=f"${prediction:,.2f}",
+                value=f"₽{prediction:,.2f}",
                 delta=None
             )
+
+    
+    # 3. Блок информации о модели
+    st.header("🤖 Информация о модели")
+
+    # Информация о пайплайне
+    st.subheader("Структура пайплайна")
+    st.write("**Шаги:**")
+    for i, (step_name, step_obj) in enumerate(pipeline.steps):
+        st.write(f"{i+1}. **{step_name}**: {type(step_obj).__name__}")
+
+    # Детали preprocessor
+    if hasattr(pipeline.named_steps['preprocessor'], 'transformers'):
+        st.write("**Препроцессор содержит:**")
+        for name, transformer, cols in pipeline.named_steps['preprocessor'].transformers:
+            if name != 'remainder':
+                st.write(f"- {name}: {type(transformer).__name__} → {len(cols) if isinstance(cols, list) else '?'} признаков")
+
+    # Информация о регрессоре
+    regressor = pipeline.named_steps['regressor']
+    st.write(f"**Регрессор:** {type(regressor).__name__}")
+    st.write(f"- Параметры: {regressor.get_params()}")
+
+    # График весов признаков
+    st.subheader("📊 Веса признаков модели")
+
+    try:
+        # Получаем имена признаков после преобразования
+        feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
+        coefficients = regressor.coef_
+        
+        # Создаем DataFrame для визуализации
+        coef_df = pd.DataFrame({
+            'Признак': feature_names,
+            'Вес': coefficients,
+            'abs_weight': abs(coefficients)
+        }).sort_values('abs_weight', ascending=False)
+        
+        # Барплот
+        fig, ax = plt.subplots(figsize=(10, 6))
+        bars = ax.barh(coef_df['Признак'], coef_df['Вес'])
+        
+        # Раскраска по знаку
+        for bar, weight in zip(bars, coef_df['Вес']):
+            bar.set_color('red' if weight < 0 else 'green')
+        
+        ax.set_xlabel('Вес признака')
+        ax.set_title('Топ самых важных признаков')
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+        # Таблица с весами
+        with st.expander("Посмотреть все веса"):
+            st.dataframe(coef_df[['Признак', 'Вес']].round(4))
+            
+    except Exception as e:
+        st.warning(f"Не удалось построить график весов: {e}")
     
 
 
