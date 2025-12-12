@@ -7,6 +7,10 @@ import plotly.express as px
 # from sklearn.pipeline import Pipeline
 # from sklearn.linear_model import LinearRegression, Ridge
 import numpy as np
+import matplotlib.pyplot as plt
+import random
+import seaborn as sns
+import re
 
 
 ##### 0. конфиг страницы
